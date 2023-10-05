@@ -47,6 +47,3 @@ def logout(request):
     return redirect('/')
 
 
-
-class CustomLoginView(LoginView):
-    template_name = 'account/login.html'  # Replace with your custom login template
