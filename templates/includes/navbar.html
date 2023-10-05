@@ -70,9 +70,9 @@
 
                         {% if user.is_authenticated %}
                         <div class="widget-header">
-                            <small class="title text-muted">Welcome!</small>
+                            <small class="title text-muted " style="font-size: medium;"><b>Welcome! {{user.username}}</b></small>
                             <div> 
-                                <a href="">{{user.username}}</a> <span class="dark-transp"> | </span>
+                                <a href="{% url 'dashboard' %}">DashBoard</a> <span class="dark-transp"> | </span>
                                 <a href="{% url 'logout' %}"> Logout</a>
                             </div>
                         </div>
