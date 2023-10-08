@@ -40,8 +40,8 @@
 				<div class="fix-height">
 					<a href="{{product.get_url}}" class="title">{{ product.product_name }}</a>
 					<div class="price-wrap mt-2">
-						<span class="price">{{ product.product_price }} INR</span>
-						<del class="price-old">{{ product.product_price|add:1900 }} INR</del>
+						<span class="price">$ {{ product.product_price }}</span>
+						<del class="price-old">${{ product.product_price|add:1900 }}</del>
 					</div> <!-- price-wrap.// -->
 				</div>
 			</figcaption>

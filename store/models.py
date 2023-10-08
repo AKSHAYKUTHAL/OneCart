@@ -27,8 +27,8 @@ class Product(models.Model):
     category = models.ForeignKey(Categories, on_delete=models.CASCADE)
     product_created_date = models.DateTimeField(auto_now_add=True)
     product_modified_date = models.DateTimeField(auto_now_add=True)
-    product_colors = models.ManyToManyField(ProductColor, blank=True,null=True) 
-    product_sizes = models.ManyToManyField(ProductSize, blank=True,null=True)  
+    product_colors = models.ManyToManyField(ProductColor, blank=True,) 
+    product_sizes = models.ManyToManyField(ProductSize, blank=True)  
 
     def __str__(self):
         return self.product_name

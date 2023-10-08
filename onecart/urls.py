@@ -28,6 +28,11 @@ urlpatterns = [
     path('cart/',include('cart.urls')),
 
 
+    # orders
+
+    path('orders/',include('orders.urls')),
+
+
 ]
 
 if settings.DEBUG:

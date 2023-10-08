@@ -1,13 +1,27 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
-
 {% block title %}
     Cart
 {% endblock %}
 
 {% block content %}
 <section class="section-content padding-y bg">
+
+    <div class="container">
+    
+        <!-- Add an alert here -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
     <div class="container">
         <!-- ============================ COMPONENT 1 ================================= -->
         {% if not cart %}
@@ -71,7 +85,7 @@
                                     <td>
                                         <!-- Display current product price -->
                                         <div class="price-wrap">
-                                            <var class="price">{{cart_item.sub_total | intcomma}} INR</var>
+                                            <var class="price">$ {{cart_item.sub_total | intcomma}} </var>
                                             <small class="">{{ cart_item.product.product_price | intcomma}} each</small>
                                         </div>
                                     </td>
@@ -91,21 +105,22 @@
                         <div class="card-body">
                             <dl class="dlist-align">
                                 <dt>Total price:</dt>
-                                <dd class="text-right">{{ total | intcomma }} INR</dd>
+                                <dd class="text-right">$ {{ total | intcomma }}</dd>
                             </dl>
                             <dl class="dlist-align">
                                 <dt>Tax:</dt>
-                                <dd class="text-right">{{ tax | intcomma }} INR</dd>
-                            </dl>
-                            <dl class="dlist-align">
-                                <dt>Total:</dt>
-                                <dd class="text-right text-dark b"><strong>{{ grand_total | intcomma }} INR</strong></dd>
+                                <dd class="text-right">$ {{ tax | intcomma }}</dd>
                             </dl>
                             <hr>
+                            <dl class="dlist-align">
+                                <dt>Total:</dt>
+                                <dd class="text-right text-dark b"><strong>$ {{ grand_total | intcomma }}</strong></dd>
+                            </dl>
+                        <br>
                             <p class="text-center mb-3">
                                 <img src="{% static './images/misc/payments.png' %}" height="26">
                             </p>
-                            <a href="./place-order.html" class="btn btn-primary btn-block">Checkout</a>
+                            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block">Checkout</a>
                             <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
                         </div> <!-- card-body.// -->
                     </div> <!-- card.// -->
@@ -115,4 +130,13 @@
         <!-- ============================ COMPONENT 1 END .// ================================= -->
     </div> <!-- container .//  -->
 </section>
+
+<script>
+    $(document).ready(function () {
+        // Hide the alert after 3 seconds
+        setTimeout(function () {
+            $(".alert").alert('close');
+        }, 3000);
+    });
+</script>
 {% endblock %}

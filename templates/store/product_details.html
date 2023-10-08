@@ -38,8 +38,8 @@
                                 <h2 class="title">{{ product.product_name }}</h2>
                             {% endif %}
                             <div class="mb-3">
-                                <var class="price h4">{{ product.product_price |intcomma }} INR</var>
-                                <del class="price-old h5">{{ product.product_price|add:1900 }} INR</del>
+                                <var class="price h4">$ {{ product.product_price |intcomma }}</var>
+                                <del class="price-old h5">$ {{ product.product_price|add:1900 }}</del>
                             </div>
 
                             <p>{{ product.product_description }}</p>

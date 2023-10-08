@@ -7,22 +7,58 @@ import uuid
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-
+from django.contrib import messages
 
 
 
 def _cart_id(request):
     if request.user.is_authenticated:
-        return str(request.user.id)
+        # If the user is logged in, use their user ID as part of the cart ID
+        cart_id = str(request.user.id)
+        if 'cart_id' in request.session:
+            # Merge the session cart items with the user's cart items if both exist
+            session_cart_id = request.session['cart_id']
+            if session_cart_id != cart_id:
+                try:
+                    session_cart = Cart.objects.get(cart_id=session_cart_id)
+                    user_cart, created = Cart.objects.get_or_create(cart_id=cart_id)
+
+                    # Transfer the session cart items to the user's cart
+                    session_cart_items = CartItem.objects.filter(cart=session_cart)
+                    for session_cart_item in session_cart_items:
+                        # Check if the same item exists in the user's cart
+                        user_cart_item, created = CartItem.objects.get_or_create(
+                            cart=user_cart,
+                            product=session_cart_item.product,
+                            item_color=session_cart_item.item_color,
+                            item_size=session_cart_item.item_size,
+                            user=request.user,  # Set the user field to the logged-in user
+                        )
+                        if not created:
+                            # If the item already exists, update the quantity by adding the session quantity
+                            user_cart_item.quantity += session_cart_item.quantity
+                        else:
+                            # If the item did not exist in the user's cart, assign the session quantity
+                            user_cart_item.quantity = session_cart_item.quantity
+                        user_cart_item.save()
+
+                    # Delete the session cart
+                    session_cart.delete()
+                    del request.session['cart_id']
+                except Cart.DoesNotExist:
+                    pass
+        return cart_id
     else:
-        cart = request.session.get('cart_id')
-        if not cart:
-            cart = str(uuid.uuid4())  # Generate a random cart ID
-            request.session['cart_id'] = cart
-        return cart
+        cart_id = request.session.get('cart_id')
+        if not cart_id:
+            cart_id = str(uuid.uuid4())  # Generate a random cart ID
+            request.session['cart_id'] = cart_id
+        return cart_id
 
 
-@login_required
+
+
+
 def cart(request,total=0,quantity=0,cart_items=None):
     tax=0
     grand_total=0
@@ -53,14 +89,22 @@ def cart(request,total=0,quantity=0,cart_items=None):
     return render(request, 'store/cart.html',context)
 
 
-@login_required
+
 def add_to_cart(request, product_id):
     product = Product.objects.get(id=product_id)
-    cart_id = _cart_id(request)
+    
+    # Check if the user is authenticated
+    if request.user.is_authenticated:
+        current_user = request.user
+        cart_id = str(request.user.id)
+    else:
+        
+        cart_id = _cart_id(request)
+        request.session['cart_id'] = cart_id
 
     if request.method == 'POST':
-        color = request.POST.get('color')
-        size = request.POST.get('size')
+        color = request.POST.get('color', 'choose')  # Default to 'choose' if not provided
+        size = request.POST.get('size', 'choose')    # Default to 'choose' if not provided
     else:
         # If color and size are not provided in the POST request, set them to the first available options
         available_colors = product.product_colors.all()
@@ -88,36 +132,57 @@ def add_to_cart(request, product_id):
         ).first()
 
         if cart_item:
+            if product.product_stock > cart_item.quantity:
             # If the item exists, increase its quantity by 1
-            cart_item.quantity += 1
-            cart_item.save()
+                cart_item.quantity += 1
+                cart_item.save()
+            else:
+                alert_message = "Sorry, there is limited stock available for this product."
+                messages.warning(request, alert_message)
         else:
+            if request.user.is_authenticated:
+                cart_item = CartItem.objects.create(
+                    user=current_user,
+                    product=product,
+                    quantity=1,
+                    cart=cart,
+                    item_color=color,
+                    item_size=size,
+                )
+            else:
             # If no such item exists, create a new cart item with the selected color and size
-            cart_item = CartItem.objects.create(
-                product=product,
-                quantity=1,
-                cart=cart,
-                item_color=color,
-                item_size=size,
-            )
-            cart_item.save()
+                cart_item = CartItem.objects.create(
+                    product=product,
+                    quantity=1,
+                    cart=cart,
+                    item_color=color,
+                    item_size=size,
+                )
+                cart_item.save()
     except Cart.DoesNotExist:
-        cart = Cart.objects.create(cart_id=cart_id)
-        cart_item = CartItem.objects.create(
-            product=product,
-            quantity=1,
-            cart=cart,
-            item_color=color,
-            item_size=size,
-        )
-        cart_item.save()
+            if request.user.is_authenticated:
+                cart = Cart.objects.create(cart_id=cart_id)
+                cart_item = CartItem.objects.create(
+                    user=current_user,
+                    product=product,
+                    quantity=1,
+                    cart=cart,
+                    item_color=color,
+                    item_size=size,
+                )
+                cart_item.save()
+            else:
+                cart = Cart.objects.create(cart_id=cart_id)
+                cart_item = CartItem.objects.create(
+                    product=product,
+                    quantity=1,
+                    cart=cart,
+                    item_color=color,
+                    item_size=size,
+                )
+                cart_item.save()
 
     return redirect('cart')
-
-
-
-
-
 
 
     # Create or get the Cart object using the cart_id
@@ -146,7 +211,6 @@ def remove_from_cart(request, product_id, color, size):
 
 
 
-
 def remove_stack_from_cart(request, product_id, color, size):
     cart_id = _cart_id(request)
     product = get_object_or_404(Product, id=product_id)
@@ -165,5 +229,26 @@ def remove_stack_from_cart(request, product_id, color, size):
     return HttpResponseBadRequest("Product not found in the cart.")
 
 
+
+@login_required(login_url='login')
+def checkout(request):
+    cart_items = CartItem.objects.filter(cart__cart_id=_cart_id(request), is_active=True)
+
+    # Calculate other checkout-related details here if needed
+    total = 0
+    for cart_item in cart_items:
+        total += cart_item.sub_total()
+
+    tax = (2 * total) / 100
+    grand_total = total + tax
+
+    context = {
+        'cart_items': cart_items,  # Pass the cart items to the template
+        'total': total,            # Pass the total to the template
+        'tax': tax,                # Pass the tax to the template
+        'grand_total': grand_total  # Pass the grand total to the template
+    }
+
+    return render(request, 'store/checkout.html', context)
 
 
