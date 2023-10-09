@@ -9,6 +9,8 @@ from django.template.loader import render_to_string
 from store.models import Product
 from django.core.mail import EmailMessage
 from django.http import JsonResponse
+from django.conf import settings
+from django.template import RequestContext  # Import RequestContext
 
 
 
@@ -75,7 +77,11 @@ def payments(request):
     send_email.send()
 
     # Send order number and transaction id back to sendData method via JsonResponse
-    return render(request,'orders/payments.html')
+    data = {
+        'order_number': order.order_number,
+        'transID': payment.payment_id,
+    }
+    return JsonResponse(data)
 
 
 
@@ -144,3 +150,45 @@ def place_order(request, total=0, quantity=0,):
         return redirect('checkout')
 
 
+def order_complete(request):
+    order_number = request.GET.get('order_number')
+    transID = request.GET.get('payment_id')
+    
+
+    try:
+        order = Order.objects.get(order_number=order_number, is_ordered=True)
+        ordered_products = OrderProduct.objects.filter(order_id=order.id)
+
+        subtotal = 0
+        for i in ordered_products:
+            subtotal += i.product_price * i.quantity
+
+        payment = Payment.objects.get(payment_id=transID)
+
+        context = {
+            'order': order,
+            'ordered_products': ordered_products,
+            'order_number': order.order_number,
+            'transID': payment.payment_id,
+            'payment': payment,
+            'subtotal': subtotal,
+        }
+
+        # Render the invoice template to a string
+        invoice_html = render_to_string('orders/invoice.html', context)
+
+        # Send the invoice as an email
+        subject = 'Order Confirmed !!! Invoice for Order #' + order.order_number +'from OneCart'
+        message = 'Please find attached the invoice for your recent order.'
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [order.user.email,order.email]
+
+        email = EmailMessage(subject, message, from_email, recipient_list)
+        email.attach('invoice.html', invoice_html, 'text/html')
+        email.send()
+
+
+
+        return render(request, 'orders/order_complete.html', context)
+    except (Payment.DoesNotExist, Order.DoesNotExist):
+        return redirect('home')

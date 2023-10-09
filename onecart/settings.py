@@ -109,3 +109,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'akshaykuthal99@gmail.com'  # Replace with your Gmail email address
 EMAIL_HOST_PASSWORD = 'orhnhphyfvspputl'  # Replace with your Gmail email password or App Password
+
+
+TIME_ZONE =  'Asia/Kolkata'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
