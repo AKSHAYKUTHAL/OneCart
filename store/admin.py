@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Product, ProductColor, ProductSize
+from .models import Product, ProductColor, ProductSize,ReviewRating
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['product_name', 'category', 'product_price', 'product_stock', 'product_is_available']
@@ -8,3 +8,5 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductSize)
 admin.site.register(ProductColor)
+admin.site.register(ReviewRating)
+

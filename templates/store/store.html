@@ -141,18 +141,27 @@ Store Page
 
 <div class="row">
 	{% if products %}
-		{% for product in products %}
+		{% for product, discounted_price in discounted_products %}
 			<div class="col-md-4">
-				<figure class="card card-product-grid">
+				<figure class="card card-product-grid" >
 					<div class="img-wrap"> 
 						<img src="{{ MEDIA_URL }}{{ product.product_image.url }}">    
 					</div> <!-- img-wrap.// -->
 					<figcaption class="info-wrap">
 						<div class="fix-height">
 							<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
-							<div class="price-wrap mt-2">
-								<span class="price"> $ {{ product.product_price |intcomma}} </span>
-								<del class="price-old">$ {{ product.product_price|add:1900 }}</del>
+							<div class="price-wrap mt-2" >
+								<var class="price h4" style="float: left;">$ {{ product.product_price|floatformat:"0"  |intcomma }}</var>
+								<del class="price-old h5" >$ {{ discounted_price|floatformat:"0"  |intcomma }}</del>
+								<div class="rating-star" style=" float:right;">
+									<small>
+										<i class="fa fa-star{% if product.average_review < 0.5 %}-o{% elif product.average_review >= 0.5 and product.average_review < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+										<i class="fa fa-star{% if product.average_review < 1.5 %}-o{% elif product.average_review >= 1.5 and product.average_review < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+										<i class="fa fa-star{% if product.average_review < 2.5 %}-o{% elif product.average_review >= 2.5 and product.average_review < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+										<i class="fa fa-star{% if product.average_review < 3.5 %}-o{% elif product.average_review >= 3.5 and product.average_review < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+										<i class="fa fa-star{% if product.average_review < 4.5 %}-o{% elif product.average_review >= 4.5 and product.average_review < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+									</small>
+                    			</div>
 							</div> <!-- price-wrap.// -->
 						</div>
 						{% if product.id in cart_product_ids %}
