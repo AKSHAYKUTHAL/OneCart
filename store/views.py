@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from cart.views import _cart_id
-from . models import Product,ReviewRating
+from . models import Product,ReviewRating,ProductGallery
 from home.models import Categories
 from cart.models import CartItem
 from django.db.models import Q
@@ -77,6 +77,8 @@ def product_details(request, category_slug, product_slug):
     # Get the reviews
     reviews = ReviewRating.objects.filter(product_id = product.id,status=True)
 
+    product_gallery = ProductGallery.objects.filter(product_id=product.id)
+
     context = {
         'product': product,
         'product_slug': product_slug, 
@@ -87,6 +89,7 @@ def product_details(request, category_slug, product_slug):
         'discounted_price':discounted_price,
         'orderproduct':orderproduct,
         'reviews':reviews,
+        'product_gallery':product_gallery
     }
 
     return render(request, 'store/product_details.html',context)

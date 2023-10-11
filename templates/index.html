@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
 
 
 
@@ -41,8 +42,18 @@
 					<a href="{{product.get_url}}" class="title">{{ product.product_name }}</a>
 					<div class="price-wrap mt-2">
 						<span class="price">$ {{ product.product_price }}</span>
-						<del class="price-old">${{ product.product_price|add:1900 }}</del>
+						<del class="price-old h5">$ {{ discounted_price|floatformat:"0" |intcomma }}</del>
 					</div> <!-- price-wrap.// -->
+					<div class="rating-star">
+						<span>
+							<i class="fa fa-star{% if product.average_review < 0.5 %}-o{% elif product.average_review >= 0.5 and product.average_review < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+							<i class="fa fa-star{% if product.average_review < 1.5 %}-o{% elif product.average_review >= 1.5 and product.average_review < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+							<i class="fa fa-star{% if product.average_review < 2.5 %}-o{% elif product.average_review >= 2.5 and product.average_review < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+							<i class="fa fa-star{% if product.average_review < 3.5 %}-o{% elif product.average_review >= 3.5 and product.average_review < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+							<i class="fa fa-star{% if product.average_review < 4.5 %}-o{% elif product.average_review >= 4.5 and product.average_review < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+							<span>{{product.count_review}} reviews</span>
+						</span>
+					</div>
 				</div>
 			</figcaption>
 		</figure>
