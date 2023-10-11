@@ -1,0 +1,61 @@
+<style>
+/* Custom styles for the sidebar links */
+.list-group-item {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    border: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    color: #333; /* Text color */
+}
+
+.list-group-item:hover {
+    background-color: #f0f0f0; /* Hover background color */
+    text-decoration: none;
+}
+
+/* Additional styles for the active link */
+.list-group-item.active {
+    background-color: #3167eb; /* Active link background color */
+    color: #fff; /* Active link text color */
+}
+
+/* Custom styles for the logout button */
+.btn-light {
+    background-color: #3167eb; /* Button background color */
+    color: #fff; /* Button text color */
+    border: none;
+    font-weight: bold;
+}
+
+.btn-light:hover {
+    background-color: #2449b5; /* Hover background color */
+    color: #fff; /* Hover text color */
+}
+
+
+</style>
+
+<aside class="col-md-3">
+    <!-- SIDEBAR -->
+    <div class="list-group">
+        <a class="list-group-item {% if '/account/' == request.path %}active{% endif %}" href="{% url 'dashboard' %}">
+            Dashboard
+        </a>
+        <a class="list-group-item {% if '/my_orders/' in request.path %}active{% endif %}" href="{% url 'my_orders' %}">
+            My Orders
+        </a>
+        <a class="list-group-item {% if '/edit_profile/' in request.path %}active{% endif %}" href="{% url 'edit_profile' %}">
+            Edit Profile
+        </a>
+        <a class="list-group-item {% if '/change_password/' in request.path %}active{% endif %}" href="{% url 'change_password' %}">
+            Change Password
+        </a>
+    </div>
+    <br>
+    <a class="btn btn-light btn-block" href="{% url 'logout' %}">
+        Log out
+    </a>
+    <!-- SIDEBAR .//END -->
+</aside>
