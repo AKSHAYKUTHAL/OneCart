@@ -1,11 +1,14 @@
 import os
 from pathlib import Path
+from decouple import config
+from django.utils.translation import gettext_lazy as _
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-qotikmlxy271)urd_7+sukl538iqsp^q8e&pfj^i)p7*tmskcl'
+SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -22,6 +25,7 @@ INSTALLED_APPS = [
     'cart',
     'django.contrib.humanize',
     'orders',
+    # 'admin_honeypot'
 ]
 
 MIDDLEWARE = [
@@ -32,7 +36,17 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_session_timeout.middleware.SessionTimeoutMiddleware', # session logout after inactivity 
+    # 'home.language_middleware.LanguageMiddleware',
+    # 'django.middleware.locale.LocaleMiddleware',
+
+
+
 ]
+SESSION_EXPIRE_SECONDS = 3600 # 1 hour
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+
+
 
 ROOT_URLCONF = 'onecart.urls'
 
@@ -58,11 +72,11 @@ WSGI_APPLICATION = 'onecart.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'greatcart',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
+        'ENGINE': config('ENGINE'),
+        'NAME': config('NAME'),
+        'USER': config('USER'),
+        'PASSWORD': config('PASSWORD'),
+        'PASSWORD': config('PASSWORD'),
     }
 }
 
@@ -81,10 +95,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_TZ = True
+LANGUAGE_CODE = config('LANGUAGE_CODE')
+TIME_ZONE = config('TIME_ZONE')
+USE_I18N = config('USE_I18N', default=True, cast=bool)
+USE_TZ = config('USE_TZ', default=True, cast=bool)
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -103,12 +117,12 @@ LOGIN_URL = '/account/login/'
 LOGIN_REDIRECT_URL = '/'
 
 # Email settings for sending emails through Gmail (example)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'akshaykuthal99@gmail.com'  # Replace with your Gmail email address
-EMAIL_HOST_PASSWORD = 'orhnhphyfvspputl'  # Replace with your Gmail email password or App Password
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD') 
 
 
 TIME_ZONE =  'Asia/Kolkata'

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from cart.views import _cart_id
-from . models import Product,ReviewRating,ProductGallery
+from . models import Product,ReviewRating,ProductGallery,ProductColor,ProductSize
 from home.models import Categories
 from cart.models import CartItem
 from django.db.models import Q
@@ -9,6 +9,8 @@ from decimal import Decimal  # Import Decimal for precise decimal arithmetic
 from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
 
 
 
@@ -40,11 +42,17 @@ def store(request, category_slug=None):
     for item in cart_items:
         cart_product_ids.append(item.product.id)
 
+    colors = ProductColor.objects.all()
+    sizes = ProductSize.objects.all()
+
+
     context = {
         'products': paged_products, 
         'cart_product_ids': cart_product_ids,
         'product_count': product_count,
         'discounted_products': discounted_products,
+        'colors':colors,
+        'sizes':sizes,
     }
 
     return render(request, 'store/store.html', context)
@@ -149,4 +157,46 @@ def submit_review(request,product_id):
                 data.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
+
+
+
+
+# def filter_products(request):
+#     category_id = request.POST.get('category')
+#     color = request.POST.getlist('color')
+#     size = request.POST.getlist('size')
+#     min_price = request.POST.get('min-price')
+#     max_price = request.POST.get('max-price')
+
+#     print(f"categories = {category_id}")
+#     print(f"colors = {color}")
+#     print(f"sizes = {size}")
+#     print(f"min price = {min_price}")
+#     print(f"max price = {max_price}")
+
+#     # Ensure that min_price and max_price are converted to Decimal
+#     min_price = Decimal(min_price) if min_price else Decimal('0')
+#     max_price = Decimal(max_price) if max_price else Decimal('999999999')  # Update with a suitable maximum value
+
+
+#     # Filter products based on the selected options
+#     products = Product.objects.filter(
+#         Q(category=category_id),
+#         Q(product_colors__name__in=color) if color else Q(),  # Only filter if color is selected
+#         Q(product_sizes__name__in=size) if size else Q(),  # Only filter if size is selected
+#         Q(product_price__gte=min_price, product_price__lte=max_price),
+#         product_is_available=True
+#     )
+
+#     # You can serialize the products and return them as JSON
+#     product_data = [
+#         {
+#             'product_name': product.product_name,
+#             'product_price': product.product_price,
+#             # Add more fields as needed
+#         }
+#         for product in products
+#     ]
+
+#     return JsonResponse({'products': product_data})
 
