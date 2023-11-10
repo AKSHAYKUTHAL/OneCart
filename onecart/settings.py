@@ -68,6 +68,8 @@ TEMPLATES = [
     },
 ]
 
+
+
 WSGI_APPLICATION = 'onecart.wsgi.application'
 
 DATABASES = {
